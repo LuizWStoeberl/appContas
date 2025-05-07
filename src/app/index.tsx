@@ -1,46 +1,27 @@
-import { StyleSheet, Text, TextInput, View } from "react-native";
+import { router } from "expo-router";
+import { useEffect } from "react";
+import Login from "./auth/login";
 
-export default function Index() {
-    
+
+
+export default function Index () {
+
+    useEffect (() => {
+        const timeout = setTimeout(() => {
+            const isLoggedIn = false;
+
+            if(isLoggedIn) {
+                router.navigate("/tabs/profile")
+            } else {
+                return (<Login />);
+            }
+        }, 1000);
+
+        return () => clearTimeout(timeout);
+    }, []);
+
+
     return (
-        <View style={styles.container}>
-            <Text style={styles.title}>Bem Vindo(a)</Text>
-            <View style={styles.headerInput}>
-                <TextInput 
-                style={styles.input}
-                placeholder="Faça seu login"
-                placeholderTextColor='#FFF'
-                />
-            </View>
-            <View style={styles.headerInput}>
-            <TextInput 
-                style={styles.input}
-                placeholder="Cire sua Conta"
-                placeholderTextColor='#FFF'
-                />
-            </View>
-        </View>
-    )
+    <Login />
+    );
 }
-
-export const styles = StyleSheet.create({
-    container:{
-        flex:1,
-        backgroundColor:"#242A32",
-        paddingHorizontal:30,
-        paddingTop:35
-    },
-    title:{
-        fontSize:25,
-        color:"black",
-        fontWeight:"bold",
-        textAlign:"center"
-    },
-    headerInput:{
-        padding:10,
-        textAlign:"center"
-    },
-    input:{
-        textAlign:"center"
-    }
-})
