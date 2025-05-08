@@ -8,17 +8,11 @@ export default function Index() {
             <View style={styles.headerInput}>
                 <TextInput 
                 style={styles.input}
-                placeholder="Faça seu login"
+                placeholder="Adicione sua conta:"
                 placeholderTextColor='#FFF'
                 />
             </View>
-            <View style={styles.headerInput}>
-            <TextInput 
-                style={styles.input}
-                placeholder="Cire sua Conta"
-                placeholderTextColor='#FFF'
-                />
-            </View>
+            
         </View>
     )
 }
