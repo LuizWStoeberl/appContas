@@ -4,7 +4,7 @@ import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useRouter } from 'expo-router';
 import { FirebaseError } from 'firebase/app';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { collection, doc, setDoc } from 'firebase/firestore';
+import { doc, setDoc } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
 import { StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { auth, db } from "../firebase";
@@ -23,56 +23,44 @@ export default function Register() {
     const [phone, setPhone] = useState('');
 
     const register = async () => {
-        if (!email || !password) {
-            setErrorMessage('Informe o e-mail e senha.');
-            return;
-        }
+    if (!email || !password) {
+        setErrorMessage('Informe o e-mail e senha.');
+        return;
+    }
 
-        if (!regexEmail.test(email)) {
-            setErrorMessage('E-mail inválido');
-            return;
-        }
+    if (!regexEmail.test(email)) {
+        setErrorMessage('E-mail inválido');
+        return;
+    }
 
-        if (!regexPassword.test(password)) {
-            setErrorMessage('A senha deve conter no mínimo 8 caracteres, letra maiúscula, minúscula, número e símbolo');
-            return;
-        }
+    if (!regexPassword.test(password)) {
+        setErrorMessage('A senha deve conter no mínimo 8 caracteres, letra maiúscula, minúscula, número e símbolo');
+        return;
+    }
 
-        setErrorMessage('');
+    setErrorMessage('');
 
-        try {
-            await createUserWithEmailAndPassword(auth, email, password);
-            setSuccessMessage('Conta criada com sucesso!');
-            setTimeout(() => {
-                router.replace("/"); 
-            }, 1500);
-        } catch (error: any) {
-            const firebaseError = error as FirebaseError;
-            setErrorMessage(firebaseError.message);
-        }
+    try {
+        // ✅ Cria o usuário
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
 
-        try {
-            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-            const user = userCredential.user;
-            const uid = user.uid; // Aqui você pega o UID
-            console.log("UID do usuário:", uid); 
+        // ✅ Salva os dados no Firestore usando o UID do usuário
+        await setDoc(doc(db, "users", user.uid), {
+            name,
+            phone,
+            email: user.email
+        });
 
-            // ✅ Salva nome e telefone no Firestore
-            await setDoc(doc(collection(db, "users"), user.uid), {
-                name,
-                phone,
-                email: user.email
-            });
-
-            setSuccessMessage('Conta criada com sucesso!');
-            setTimeout(() => {
-                router.replace("/");
-            }, 1500);
-        } catch (error: any) {
-            const firebaseError = error as FirebaseError;
-            setErrorMessage(firebaseError.message);
-        }
-    };
+        setSuccessMessage('Conta criada com sucesso!');
+        setTimeout(() => {
+            router.replace("/");
+        }, 1500);
+    } catch (error: any) {
+        const firebaseError = error as FirebaseError;
+        setErrorMessage(firebaseError.message);
+    }
+};
     
 
     useEffect(() => {

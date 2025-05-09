@@ -1,12 +1,10 @@
-// src/app/firebase.js
-
 import { initializeApp } from "firebase/app";
 import {
-    createUserWithEmailAndPassword,
-    getAuth,
-    sendPasswordResetEmail,
-    signInWithEmailAndPassword,
-    signOut
+  createUserWithEmailAndPassword,
+  getAuth,
+  sendPasswordResetEmail,
+  signInWithEmailAndPassword,
+  signOut
 } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
@@ -21,12 +19,13 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 
-// ✅ Forma correta para Expo (sem getReactNativePersistence)
+
 const auth = getAuth(app);
 const db = getFirestore(app);
 
 export {
-    auth, createUserWithEmailAndPassword, db, sendPasswordResetEmail,
-    signInWithEmailAndPassword,
-    signOut
+  auth, createUserWithEmailAndPassword, db, sendPasswordResetEmail,
+  signInWithEmailAndPassword,
+  signOut
 };
+
