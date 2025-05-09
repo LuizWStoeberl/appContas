@@ -1,27 +1,31 @@
 import { router } from "expo-router";
-import { useEffect } from "react";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { useEffect, useState } from "react";
 import Login from "./auth/login";
 
-
+const auth = getAuth()
 
 export default function Index () {
 
-    useEffect (() => {
-        const timeout = setTimeout(() => {
-            const isLoggedIn = false;
+    const [checkingAuth, setCheckingAuth] = useState(true);
 
-            if(isLoggedIn) {
-                router.navigate("/tabs/profile")
+    useEffect(() => {
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // Usuário autenticado
+                router.replace("/tabs/profile");
             } else {
-                return (<Login />);
+                // Usuário não autenticado
+                setCheckingAuth(false);
             }
-        }, 1000);
+        });
 
-        return () => clearTimeout(timeout);
+        return unsubscribe;
     }, []);
 
+    if (checkingAuth) {
+        return null; // ou um <Loading /> se quiser mostrar algo enquanto carrega
+    }
 
-    return (
-    <Login />
-    );
+    return <Login />;
 }

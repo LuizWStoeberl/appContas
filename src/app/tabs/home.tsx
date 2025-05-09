@@ -1,9 +1,25 @@
-import { StyleSheet, Text, TextInput, View } from "react-native";
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import { useRouter } from 'expo-router';
+import { StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 
 export default function Index() {
     
+    const router = useRouter()
+        
+            function handleLogin () {
+                router.navigate("/auth/login")
+            }
+
     return (
+
         <View style={styles.container}>
+
+            <View style={styles.logoutIcon}>
+                <TouchableOpacity onPress={handleLogin}>
+                <MaterialIcons name="logout" size={24} color="#f4f4f4" />
+                </TouchableOpacity>
+            </View>
+
             <Text style={styles.title}>Bem Vindo(a)</Text>
             <View style={styles.headerInput}>
                 <TextInput 
@@ -36,5 +52,9 @@ export const styles = StyleSheet.create({
     },
     input:{
         textAlign:"center"
+    },
+    logoutIcon: {
+        alignContent: "flex-end",
+        alignItems: "flex-end"
     }
 })

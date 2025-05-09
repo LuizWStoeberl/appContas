@@ -1,26 +1,16 @@
 import EvilIcons from '@expo/vector-icons/EvilIcons';
+import Feather from '@expo/vector-icons/Feather';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useRouter } from 'expo-router';
 import { FirebaseError } from 'firebase/app';
-import { UserCredential } from 'firebase/auth';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { collection, doc, setDoc } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
 import { StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
-import {
-    auth,
-    signInWithEmailAndPassword
-} from "../firebase";
+import { auth, db } from "../firebase";
 
-
-
-export default function Login () {
+export default function Register() {
     const router = useRouter();
-
-    function handleRegister () {
-        router.navigate("/auth/register");
-    }
-
-    function handleRecuperar () {
-        router.navigate("/auth/recuperation")
-    }
 
     const regexEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const regexPassword = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
@@ -28,8 +18,11 @@ export default function Login () {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
+    const [successMessage, setSuccessMessage] = useState('');
+    const [name, setName] = useState('');
+    const [phone, setPhone] = useState('');
 
-    const login = async () => {
+    const register = async () => {
         if (!email || !password) {
             setErrorMessage('Informe o e-mail e senha.');
             return;
@@ -48,25 +41,49 @@ export default function Login () {
         setErrorMessage('');
 
         try {
-            const userCredentials: UserCredential = await signInWithEmailAndPassword(auth, email, password);
-            const user = userCredentials.user;
-            console.log("Usuário logado:", user.email);
+            await createUserWithEmailAndPassword(auth, email, password);
+            setSuccessMessage('Conta criada com sucesso!');
+            setTimeout(() => {
+                router.replace("/"); 
+            }, 1500);
+        } catch (error: any) {
+            const firebaseError = error as FirebaseError;
+            setErrorMessage(firebaseError.message);
+        }
 
-            router.replace("/tabs/home")
+        try {
+            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+            const user = userCredential.user;
+            const uid = user.uid; // Aqui você pega o UID
+            console.log("UID do usuário:", uid); 
+
+            // ✅ Salva nome e telefone no Firestore
+            await setDoc(doc(collection(db, "users"), user.uid), {
+                name,
+                phone,
+                email: user.email
+            });
+
+            setSuccessMessage('Conta criada com sucesso!');
+            setTimeout(() => {
+                router.replace("/");
+            }, 1500);
         } catch (error: any) {
             const firebaseError = error as FirebaseError;
             setErrorMessage(firebaseError.message);
         }
     };
+    
 
     useEffect(() => {
         setErrorMessage('');
+        setSuccessMessage('');
     }, [email, password]);
 
     return (
         <View style={styles.container}>
-            <Text style={styles.welcome}>Faça login na sua conta</Text>
-            
+            <Text style={styles.welcome}>Crie sua conta</Text>
+
             <View style={styles.content}>
                 <View style={styles.contentInput}> 
                     <EvilIcons name="envelope" size={32} color="#757575" />
@@ -93,53 +110,62 @@ export default function Login () {
                     />
                 </View>
 
+                <View style={styles.contentInput}> 
+                    <MaterialIcons name="drive-file-rename-outline" size={24} color="black" />
+                    <TextInput
+                        placeholder="Seu nome"
+                        style={styles.input}
+                        placeholderTextColor="#757575"
+                        value={name}
+                        onChangeText={setName}
+                        autoCapitalize="none"
+                    />
+                </View>
+
+
+                <View style={styles.contentInput}> 
+                    <Feather name="smartphone" size={24} color="black" />
+                    <TextInput
+                        placeholder="Seu telefone"
+                        style={styles.input}
+                        placeholderTextColor="#757575"
+                        value={phone}
+                        onChangeText={setPhone}
+                        autoCapitalize="none"
+                    />
+                </View>
                 {errorMessage ? (
                     <Text style={{ color: 'red', marginTop: 10 }}>{errorMessage}</Text>
                 ) : null}
+
+                {successMessage ? (
+                    <Text style={{ color: 'green', marginTop: 10 }}>{successMessage}</Text>
+                ) : null}
             </View>
 
-
-            <View style={styles.footer}>
-                <Text style={styles.footerText}>Esqueceu sua sua?</Text>
-                <TouchableOpacity onPress={handleRecuperar}>
-                    <Text style={styles.footerButtonText}>Recuperar senha</Text>
-                </TouchableOpacity>
-            </View>
-
-            <TouchableOpacity onPress={login} style={styles.buttonSignIn}>
-                <Text style={styles.buttonSignInText}>Entrar</Text>
+            <TouchableOpacity onPress={register} style={styles.buttonSignIn}>
+                <Text style={styles.buttonSignInText}>Cadastrar</Text>
             </TouchableOpacity>
-
-            <View style={styles.footer}>
-                <Text style={styles.footerText}>Ainda não tem sua conta?</Text>
-                <TouchableOpacity onPress={handleRegister}>
-                    <Text style={styles.footerButtonText}>Cadastre-se</Text>
-                </TouchableOpacity>
-            </View>
         </View>
     );
 }
 
-export const styles = StyleSheet.create({
+const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: "#181a20",
         alignItems: "center",
         paddingHorizontal: 20
     },
-    header: {
-        alignSelf:"flex-start",
-        marginTop: 50
-    },
     welcome: {
         color: "#F4F4F4",
         marginTop: 50,
         fontSize: 24,
-        fontWeight: 600
+        fontWeight: "600"
     },
     content: {
         width: "100%",
-        marginTop:50,
+        marginTop: 50,
         alignItems: "center",
         gap: 20
     },
@@ -151,7 +177,7 @@ export const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
         paddingHorizontal: 20,
-        gap: 10,
+        gap: 10
     },
     input: {
         flex: 1,
@@ -168,31 +194,7 @@ export const styles = StyleSheet.create({
     },
     buttonSignInText: {
         color: "#f4f4f4",
-        fontWeight: 600,
+        fontWeight: "600",
         fontSize: 24
-    },
-    buttonRegister: {
-        backgroundColor: "#FF00FF",
-        width: "100%",
-        height: 56,
-        borderRadius: 32,
-        alignItems: "center",
-        justifyContent: "center",
-        marginTop: 40
-    },
-    footer: {
-        marginTop: 50,
-        flexDirection: "row",
-        gap: 10
-    },
-    footerText: {
-        color: "#f4f4f4",
-        fontSize: 16,
-        fontWeight: 400
-    },
-    footerButtonText: {
-        color: "#1ab55c",
-        fontSize: 16,
-        fontWeight: 400
     }
-})
+});
