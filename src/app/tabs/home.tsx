@@ -1,3 +1,4 @@
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { useRouter } from 'expo-router';
 import { collection, deleteDoc, doc, getDocs, query } from "firebase/firestore";
@@ -8,6 +9,10 @@ import { auth, db } from "../firebase";
 
 export default function AddExpense() {
     const router = useRouter();
+
+     const handleLogin = () => {
+        router.navigate("/auth/login");
+    };
 
     const [description, setDescription] = useState("");
     const [value, setValue] = useState("");
@@ -74,7 +79,16 @@ export default function AddExpense() {
     };
 
     return (
+        
+
         <View style={styles.container}>
+
+            <View style={styles.logoutIcon}>
+                <TouchableOpacity onPress={handleLogin}>
+                    <MaterialIcons name="logout" size={24} color="#f4f4f4" />
+                </TouchableOpacity>
+            </View>
+
             <Text style={styles.title}>Adicionar Gasto</Text>
 
             <TextInput
@@ -218,4 +232,7 @@ const styles = StyleSheet.create({
         color: "#FF0000",
         fontSize: 16,
     },
+    logoutIcon: {
+        alignItems: "flex-end"
+    }
 });
