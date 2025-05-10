@@ -41,11 +41,11 @@ export default function Register() {
     setErrorMessage('');
 
     try {
-        // ✅ Cria o usuário
+        
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
 
-        // ✅ Salva os dados no Firestore usando o UID do usuário
+        // cria "tabela" users
         await setDoc(doc(db, "users", user.uid), {
             name,
             phone,
