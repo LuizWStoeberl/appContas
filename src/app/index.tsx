@@ -24,7 +24,7 @@ export default function Index () {
     }, []);
 
     if (checkingAuth) {
-        return null; // ou um <Loading /> se quiser mostrar algo enquanto carrega
+        return null; 
     }
 
     return <Login />;

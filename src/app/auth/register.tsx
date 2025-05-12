@@ -45,7 +45,7 @@ export default function Register() {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
 
-        // cria "tabela" users
+        //tabela users
         await setDoc(doc(db, "users", user.uid), {
             name,
             phone,

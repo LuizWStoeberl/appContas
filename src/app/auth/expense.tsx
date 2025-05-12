@@ -4,13 +4,13 @@ import { db } from '../firebase';
 export const addExpense = async (userId: string, description: string, value: number, date: Date) => {
     const expenseRef = collection(db, "users", userId, "expenses");
 
-    // Converte a data para um Timestamp do Firestore
+    
     const timestamp = Timestamp.fromDate(date);
 
     await addDoc(expenseRef, {
         description,
         value,
-        date: timestamp // Agora você passa um Timestamp, que é aceito pelo Firestore
+        date: timestamp 
     });
 
     console.log("Gasto adicionado!");
